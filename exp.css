@@ -1,0 +1,107 @@
+* {
+          margin: 0;
+          padding: 0;
+          font-family: Arial, Helvetica, sans-serif;
+} 
+.row {
+          display: grid;
+          grid-template-columns: repeat(53, 27px);
+}
+.grid {
+          position: absolute;
+          bottom: 0;
+          display: grid;
+}
+.empty{
+          height: 175px;
+          background-color: #130a2b;
+}
+.alert {
+          padding: 8px;
+          padding-left: 20px;
+          color: white;
+          opacity: 1;
+          transition: opacity 0.6s;
+          margin-bottom: 0px;
+}        
+.closebtn {
+          margin-left: 15px;
+          color: white;
+          font-weight: bold;
+          float: right;
+          font-size: 22px;
+          line-height: 20px;
+          cursor: pointer;
+          transition: 0.3s;
+}        
+.closebtn:hover {
+          color: black;
+}
+.Unvisited,.Visited,.path,.block{
+          height: 26px;
+          width: 26px;
+          border: 1px solid rgba(121, 192, 243, 0.356);
+          transform: translate3d(0, 0, 0);
+}
+.Visited {
+          background-color: rgb(0, 190, 218, 0.75);
+          animation: mymove 1s;
+          border: 1px solid white;
+ }
+ .disabled{
+          cursor: default;
+          pointer-events: none;
+}
+ .path{
+          background-color: yellow;
+          border-color: yellow;
+ }
+ .block{
+          background-color: rgb(5, 5, 37);
+          border-color: rgb(5, 5, 37);
+ }
+@keyframes mymove {
+          from {
+            background-color: rgb(225, 0, 255);
+          }
+          to {
+            background-color: rgb(0, 190, 218, 0.75);
+          }
+}
+.menu-bar {
+          background-color: rgb(7, 24, 46);
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+}
+.dragging{
+          opacity:0;
+}
+.menu-bar a {
+          float: left;
+          color: #f2f2f2;
+          text-align: center;
+          padding: 16px 16px;
+          text-decoration: none;
+          font-size: 17px;
+          margin: auto;
+          font-family: Arial, Helvetica, sans-serif;
+          font-weight: 600;
+}
+.menu-bar a:hover {
+          background-color: #04aa6d;
+          color: black;
+          border-radius: 3px;
+}
+/* .menu-bar a.active {
+          background-color: #04aa6d;
+} */
+img {
+          height: 22px;
+          width: 22px;
+          margin: 2px auto;
+          display: block;
+          cursor: move;
+          user-select: none;
+}
+        
