@@ -46,7 +46,7 @@ class Stack{
 }
 let Start = {row:10,col:17},End = {row:10,col:35},wall = new Set()
 let xDirections = [-1,0,1,0],yDirections = [0,1,0,-1]
-let ROW_COUNT = 21,COL_COUNT = 53
+let ROW_COUNT = 20,COL_COUNT = 53
 function createGrid(){
           let body = $("body");
           let grid = $("<div/>")
