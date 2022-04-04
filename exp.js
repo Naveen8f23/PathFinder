@@ -46,7 +46,7 @@ class Stack{
 }
 let Start = {row:10,col:17},End = {row:10,col:35},wall = new Set()
 let xDirections = [-1,0,1,0],yDirections = [0,1,0,-1]
-let ROW_COUNT = 21,COL_COUNT = 53
+let ROW_COUNT = 20,COL_COUNT = 53
 function createGrid(){
           let body = $("body");
           let grid = $("<div/>")
@@ -75,6 +75,7 @@ function dragDrop(){
                               if(draggable == draggables[0])draggable.parentElement.classList.remove('start')
                               else draggable.parentElement.classList.remove('target')
                               draggable.classList.add("dragging")
+                              console.log("drag start")
                     })
                     draggable.addEventListener('dragend',()=>{
                               let parent = draggable.parentElement,id = parent.getAttribute("id").split('-')
@@ -93,6 +94,7 @@ function dragDrop(){
                                         parent.classList.remove('block')
                               }
                               draggable.classList.remove("dragging")
+                              console.log("drag end")
                     })
           })
           Array.from(container).forEach(unit =>{
@@ -113,6 +115,7 @@ function clearGrid(){
           $(`#${Start.row}-${Start.col}`).addClass("start");
           $(`#${End.row}-${End.col}`).addClass("target");
           wall.clear();
+          console.log('grid cleared')
 }
 function clearPath(){
           for(let i = 0;i<ROW_COUNT;i++){
@@ -121,7 +124,7 @@ function clearPath(){
                               $(`#${id}`).removeClass(['Visited','path']).addClass('Unvisited');
                     }
           }
-
+          console.log('path cleared')
 }
 function createWall(){
           const container = Array.from($(".Unvisited"))
@@ -129,10 +132,17 @@ function createWall(){
           container.forEach((unit)=>{
                     unit.addEventListener("click",()=>{
                               if(!unit.classList.contains('start') && !unit.classList.contains('target')){
+                                        console.log(unit)
                                         unit.classList.toggle("block")
                                         let id = unit.getAttribute("id")
-                                        if(wall.has(id))wall.delete(id)
-                                        else wall.add(id)
+                                        if(wall.has(id)){
+                                                  console.log(id,'deleted')
+                                                  wall.delete(id)
+                                        }
+                                        else{
+                                                  console.log(id,'added')
+                                                  wall.add(id)
+                                        }
                               }
                     })
                     unit.addEventListener('dblclick',()=>{
@@ -141,6 +151,7 @@ function createWall(){
                     })
                     unit.addEventListener('mousemove',()=>{
                               if(!unit.classList.contains('start') && !unit.classList.contains('target') && isDoubleClick){
+                                        console.log('asdfsdfasgasgasfg')
                                         unit.classList.toggle("block")
                                         let id = unit.getAttribute("id")
                                         if(wall.has(id))wall.delete(id)
@@ -150,7 +161,6 @@ function createWall(){
                     unit.addEventListener('mousedown',()=>{
                               if(!unit.classList.contains('start') && !unit.classList.contains('target'))
                                         isDoubleClick = false
-                              
                     })
 
           })
@@ -160,7 +170,6 @@ async function addClick(){
           $("a").on('click', async (e)=>{
                     if(e.target.classList[0] === 'Algo'){
                               $('body').addClass('disabled')
-                              clearPath()
                               await window[e.target.name]()
                               $('body').removeClass('disabled')
                     }
@@ -169,21 +178,28 @@ async function addClick(){
           
 }
  function Dfs(){
+          console.log('Dfs Started')
+          clearPath();
           let stack = new Stack(),dp = []
           stack.push(Start.row,Start.col)
+          console.log("Dfs")
           while(!stack.isEmpty()){
                     const [row,col] = stack.pop();
                     if(row<0 || row >= ROW_COUNT || col < 0 || col >= COL_COUNT || dp.includes(`${row}-${col}`) || wall.has(`${row}-${col}`))continue;
                     dp.push(`${row}-${col}`)
+                    console.log(row,col)
                     if(row == End.row && col == End.col)break;
                     stack.push(row,col-1);
                     stack.push(row-1,col);
                     stack.push(row,col+1);
                     stack.push(row+1,col);
           }
+          console.log('Dfs Completed')
           return animate(dp,dp);
 }
  function Bfs(){
+          console.log('Bfs Started')
+          clearPath();
           let keys = [],parentSet = new Map();
           let q = new Queue(),seen = new Set()
           q.push(Start.row,Start.col)
@@ -191,6 +207,7 @@ async function addClick(){
                     const [row,col] = q.pop()
                     keys.push(`${row}-${col}`)
                     if(row == End.row && col == End.col){
+                              console.log("Reached End")
                               break;
                     }
                     for(let j = 0;j<4;j++){
@@ -202,24 +219,32 @@ async function addClick(){
                               }
                     }
           }
+          console.log('Bfs Completed')
           return animate(keys,parentSet);
 }
  function Djikstra(){
+          console.log('Djikstra Started')
+          clearPath();
           let keys = [],parentSet = new Map()
           let unvisitedNodes = new Map()
-          Array.from($(".Unvisited")).forEach((e)=>unvisitedNodes.set(e.id,1000))
+          Array.from($(".Unvisited")).forEach((e)=> unvisitedNodes.set(e.id,1000))
           unvisitedNodes.set(`${Start.row}-${Start.col}`,0);
           while(unvisitedNodes.size){
                     unvisitedNodes = sortByDistance(unvisitedNodes)
                     const key = unvisitedNodes.keys().next().value;
-                    keys.push(key)
-                    if(key == `${End.row}-${End.col}`)break;
-                    updateDistance(key,unvisitedNodes,parentSet);
+                    if(!wall.has(key)){
+                              keys.push(key)
+                              if(key == `${End.row}-${End.col}`)break;
+                              updateDistance(key,unvisitedNodes,parentSet);          
+                    }
                     unvisitedNodes.delete(key);        
           }
+          console.log('Djikstra Completed')
           return animate(keys,parentSet)
 }
  function AStar(){
+          console.log('A* Started')
+          clearPath()
           let keys = [],parentSet = new Map();
           let F = createHeuristics();
           let openSet = [`${Start.row}-${Start.col}`]
@@ -231,42 +256,52 @@ async function addClick(){
                     updateNeighbors(F,key,keys,openSet,parentSet)
                     if(key == `${End.row}-${End.col}`)break;
           }
+          console.log('A* Completed')
           return animate(keys,parentSet)
 }
 function wait(ms){
           return new Promise((resolve)=>setTimeout(resolve,ms))
 }
 async function animate(keys,parentSet){
+          console.log("Reached animate")
           for(let id of keys){
                     await wait(6)
                     $(`#${id}`).attr("class","Visited")
           }
           $(`#${Start.row}-${Start.col}`).addClass("start");
           $(`#${End.row}-${End.col}`).addClass("target");
-          return tracePath(parentSet)
+          console.log("at animate")
+          let r =  tracePath(parentSet)
+          return r;
 }
 async function tracePath(parentSet){
           let path = [];
           if(Array.isArray(parentSet)){
                     path = parentSet;
+                    console.log("array")
                     for(let id of path){
-                           await wait(10)
-                           $(`#${id}`).addClass("path")
+                              await wait(10)
+                              $(`#${id}`).addClass("path")
                     }
           }
           else{
                     let child = `${End.row}-${End.col}`
-                    if(!parentSet.has(child))return;
+                    console.log(" at trace path",parentSet.has(child))
+                    if(!parentSet.has(child)){
+                              return Promise.resolve()
+                    }
+                    console.log("Path size",path)
                     while(child != `${Start.row}-${Start.col}`){
-                           path.push(child);
-                           child = parentSet.get(child)
+                              path.push(child);
+                              child = parentSet.get(child)
                     }
                     path.push(child)
                     for(let i = path.length-1;i>=0;i--){
-                           await wait(10)
-                           $(`#${path[i]}`).addClass("path")
+                              await wait(10)
+                              $(`#${path[i]}`).addClass("path")
                     }
           }
+          
           return Promise.resolve();                 
 }
 function createHeuristics(){
@@ -286,6 +321,7 @@ function updateDistance(key,map,parentSet){
                     if(x>=0 && x< ROW_COUNT && y>=0 && y< COL_COUNT && map.has(id) && !wall.has(id)){
                               map.set(id,map.get(key)+1);
                               parentSet.set(id,key)
+                              if(id == `${End.row}-${End.col}`)console.log(id,key)
                     }
           }          
 }
