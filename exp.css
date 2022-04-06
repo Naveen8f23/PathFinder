@@ -8,9 +8,10 @@
           grid-template-columns: repeat(53, 27px);
 }
 .grid {
-          position: absolute;
+          position: fixed;
           bottom: 0;
           display: grid;
+          width: 100%;
 }
 .empty{
           height: 175px;
@@ -43,31 +44,70 @@
           border: 1px solid rgba(121, 192, 243, 0.356);
           transform: translate3d(0, 0, 0);
 }
-.Visited {
-          background-color: rgb(0, 190, 218, 0.75);
-          animation: mymove 1s;
-          border: 1px solid white;
+.block{
+          animation-name: blockAnimation;
+          animation-duration: 0.25s;
+          animation-timing-function: ease-out;
+          animation-delay: 0;
+          /* animation-direction: alternate; */
+          animation-iteration-count: 1;
+          animation-fill-mode: forwards;
+          animation-play-state: running;
+          border-color: rgb(12, 53, 71);
+ }
+.Visited{
+          animation-name: visitedAnimation;
+          animation-duration: 1.5s;
+          animation-timing-function: ease-out;
+          animation-delay: 0;
+          animation-direction: alternate;
+          animation-iteration-count: 1;
+          animation-fill-mode: forwards;
+          animation-play-state: running;
+ }
+ @keyframes visitedAnimation {
+           0%{
+                    transform: scale(0.3);
+                    background-color: rgba(0,0,66,0.75);
+                    border-radius: 100%;
+           }
+           50%{
+                    background-color: rgba(17,104,217,0,75);
+           }
+           75%{
+                    transform: scale(1.2);
+                    background-color: rgba(0,217,59,0.75);
+           }
+           100%{
+                    transform: scale(1);
+                    background-color: aquamarine;
+           }
+ }
+ @keyframes blockAnimation{
+          0% {
+                    transform: scale(.3);
+                    background-color: rgb(12, 53, 71);
+          }
+                
+          50% {
+                    transform: scale(1.2);
+                    background-color: rgb(12, 53, 71);
+          }
+                
+          100% {
+                    transform: scale(1.0);
+                    background-color: rgb(12, 53, 71);
+          }
  }
  .disabled{
           cursor: default;
           pointer-events: none;
 }
  .path{
-          background-color: yellow;
+          background-color: rgb(251, 251, 95);
           border-color: yellow;
  }
- .block{
-          background-color: rgb(5, 5, 37);
-          border-color: rgb(5, 5, 37);
- }
-@keyframes mymove {
-          from {
-            background-color: rgb(225, 0, 255);
-          }
-          to {
-            background-color: rgb(0, 190, 218, 0.75);
-          }
-}
+ 
 .menu-bar {
           background-color: rgb(7, 24, 46);
           overflow: hidden;
@@ -104,4 +144,3 @@ img {
           cursor: move;
           user-select: none;
 }
-        
