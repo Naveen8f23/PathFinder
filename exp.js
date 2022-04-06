@@ -226,18 +226,21 @@ async function addClick(){
           console.log('Djikstra Started')
           clearPath();
           let keys = [],parentSet = new Map()
-          let unvisitedNodes = new Map()
+          let unvisitedNodes = new Map(),seen = new Set();
           Array.from($(".Unvisited")).forEach((e)=> unvisitedNodes.set(e.id,1000))
           unvisitedNodes.set(`${Start.row}-${Start.col}`,0);
+          seen.add(`${Start.row}-${Start.col}`);
           while(unvisitedNodes.size){
                     unvisitedNodes = sortByDistance(unvisitedNodes)
                     const key = unvisitedNodes.keys().next().value;
                     if(!wall.has(key)){
+                              if(unvisitedNodes.get(key) == 1000)break;
                               keys.push(key)
                               if(key == `${End.row}-${End.col}`)break;
-                              updateDistance(key,unvisitedNodes,parentSet);          
+                              updateDistance(key,unvisitedNodes,parentSet,seen);          
                     }
                     unvisitedNodes.delete(key);        
+                    seen.add(key);
           }
           console.log('Djikstra Completed')
           return animate(keys,parentSet)
@@ -264,24 +267,25 @@ function wait(ms){
 }
 async function animate(keys,parentSet){
           console.log("Reached animate")
+          timer = 20
           for(let id of keys){
-                    await wait(6)
-                    $(`#${id}`).attr("class","Visited")
+                    wait(timer).then(()=>$(`#${id}`).attr("class","Visited"))
+                    timer += 10;
           }
           $(`#${Start.row}-${Start.col}`).addClass("start");
           $(`#${End.row}-${End.col}`).addClass("target");
           console.log("at animate")
-          let r =  tracePath(parentSet)
+          let r =  tracePath(parentSet,timer)
           return r;
 }
-async function tracePath(parentSet){
+async function tracePath(parentSet,timer){
           let path = [];
           if(Array.isArray(parentSet)){
                     path = parentSet;
                     console.log("array")
                     for(let id of path){
-                              await wait(10)
-                              $(`#${id}`).addClass("path")
+                              wait(timer).then(()=>$(`#${id}`).addClass("path").removeClass("Visited"))
+                              timer += 50;
                     }
           }
           else{
@@ -297,8 +301,8 @@ async function tracePath(parentSet){
                     }
                     path.push(child)
                     for(let i = path.length-1;i>=0;i--){
-                              await wait(10)
-                              $(`#${path[i]}`).addClass("path")
+                              wait(timer).then(()=>$(`#${path[i]}`).addClass("path").removeClass("Visited"))
+                              timer += 50;
                     }
           }
           
@@ -313,12 +317,12 @@ function createHeuristics(){
           }
           return F;
 }
-function updateDistance(key,map,parentSet){
+function updateDistance(key,map,parentSet,seen){
           let [row,col] = key.match(/\d+/g);
           row = parseInt(row),col = parseInt(col)
           for(let j = 0;j<4;j++){
                     let x = row+ xDirections[j],y = col+yDirections[j],id = `${x}-${y}`;
-                    if(x>=0 && x< ROW_COUNT && y>=0 && y< COL_COUNT && map.has(id) && !wall.has(id)){
+                    if(x>=0 && x< ROW_COUNT && y>=0 && y< COL_COUNT && !seen.has(id) && !wall.has(id)){
                               map.set(id,map.get(key)+1);
                               parentSet.set(id,key)
                               if(id == `${End.row}-${End.col}`)console.log(id,key)
@@ -364,3 +368,5 @@ window.onload = async function(){
           addClick();
           closeBtn();
 }
+
+
