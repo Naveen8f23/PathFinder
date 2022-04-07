@@ -132,17 +132,12 @@ function createWall(){
           container.forEach((unit)=>{
                     unit.addEventListener("click",()=>{
                               if(!unit.classList.contains('start') && !unit.classList.contains('target')){
-                                        console.log(unit)
                                         unit.classList.toggle("block")
                                         let id = unit.getAttribute("id")
-                                        if(wall.has(id)){
-                                                  console.log(id,'deleted')
-                                                  wall.delete(id)
-                                        }
-                                        else{
-                                                  console.log(id,'added')
-                                                  wall.add(id)
-                                        }
+                                        if(unit.classList.contains('path'))unit.classList.remove('path')
+                                        if(unit.classList.contains('Visited'))unit.classList.remove('Visited');
+                                        if(wall.has(id)) wall.delete(id)
+                                        else wall.add(id)
                               }
                     })
                     unit.addEventListener('dblclick',()=>{
@@ -151,8 +146,9 @@ function createWall(){
                     })
                     unit.addEventListener('mousemove',()=>{
                               if(!unit.classList.contains('start') && !unit.classList.contains('target') && isDoubleClick){
-                                        console.log('asdfsdfasgasgasfg')
                                         unit.classList.toggle("block")
+                                        if(unit.classList.contains('path'))unit.classList.remove('path')
+                                        if(unit.classList.contains('Visited'))unit.classList.remove('Visited');
                                         let id = unit.getAttribute("id")
                                         if(wall.has(id))wall.delete(id)
                                         else wall.add(id)
@@ -182,12 +178,10 @@ async function addClick(){
           clearPath();
           let stack = new Stack(),dp = []
           stack.push(Start.row,Start.col)
-          console.log("Dfs")
           while(!stack.isEmpty()){
                     const [row,col] = stack.pop();
                     if(row<0 || row >= ROW_COUNT || col < 0 || col >= COL_COUNT || dp.includes(`${row}-${col}`) || wall.has(`${row}-${col}`))continue;
                     dp.push(`${row}-${col}`)
-                    console.log(row,col)
                     if(row == End.row && col == End.col)break;
                     stack.push(row,col-1);
                     stack.push(row-1,col);
@@ -206,10 +200,7 @@ async function addClick(){
           while(!q.isEmpty()){
                     const [row,col] = q.pop()
                     keys.push(`${row}-${col}`)
-                    if(row == End.row && col == End.col){
-                              console.log("Reached End")
-                              break;
-                    }
+                    if(row == End.row && col == End.col)break;
                     for(let j = 0;j<4;j++){
                               let x = row+xDirections[j],y = col+yDirections[j],id = `${x}-${y}`;
                               if(x>=0 && x< ROW_COUNT && y>=0 && y< COL_COUNT && !seen.has(id) && !wall.has(id)){
@@ -262,50 +253,44 @@ async function addClick(){
           console.log('A* Completed')
           return animate(keys,parentSet)
 }
-function wait(ms){
-          return new Promise((resolve)=>setTimeout(resolve,ms))
-}
+const wait = ()=> new Promise(resolve => setTimeout(resolve, 1));
 async function animate(keys,parentSet){
           console.log("Reached animate")
-          timer = 20
+          let timer = 0;
           for(let id of keys){
-                    wait(timer).then(()=>$(`#${id}`).attr("class","Visited"))
-                    timer += 10;
+                    await wait()
+                    $(`#${id}`).attr("class","Visited")
           }
           $(`#${Start.row}-${Start.col}`).addClass("start");
           $(`#${End.row}-${End.col}`).addClass("target");
-          console.log("at animate")
-          let r =  tracePath(parentSet,timer)
+          let r =  tracePath(parentSet)
+          console.log("Finished animate")
           return r;
 }
-async function tracePath(parentSet,timer){
+async function tracePath(parentSet){
+          console.log("Reached animate")
           let path = [];
           if(Array.isArray(parentSet)){
                     path = parentSet;
-                    console.log("array")
                     for(let id of path){
-                              wait(timer).then(()=>$(`#${id}`).addClass("path").removeClass("Visited"))
-                              timer += 50;
+                              await wait()
+                              $(`#${id}`).addClass("path").removeClass("Visited")
                     }
           }
           else{
                     let child = `${End.row}-${End.col}`
-                    console.log(" at trace path",parentSet.has(child))
-                    if(!parentSet.has(child)){
-                              return Promise.resolve()
-                    }
-                    console.log("Path size",path)
+                    if(!parentSet.has(child)) return Promise.resolve()
                     while(child != `${Start.row}-${Start.col}`){
                               path.push(child);
                               child = parentSet.get(child)
                     }
                     path.push(child)
                     for(let i = path.length-1;i>=0;i--){
-                              wait(timer).then(()=>$(`#${path[i]}`).addClass("path").removeClass("Visited"))
-                              timer += 50;
+                              await wait()
+                              $(`#${path[i]}`).addClass("path").removeClass("Visited")
                     }
           }
-          
+          console.log("Finished animate")
           return Promise.resolve();                 
 }
 function createHeuristics(){
@@ -325,7 +310,6 @@ function updateDistance(key,map,parentSet,seen){
                     if(x>=0 && x< ROW_COUNT && y>=0 && y< COL_COUNT && !seen.has(id) && !wall.has(id)){
                               map.set(id,map.get(key)+1);
                               parentSet.set(id,key)
-                              if(id == `${End.row}-${End.col}`)console.log(id,key)
                     }
           }          
 }
